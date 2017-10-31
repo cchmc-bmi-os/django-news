@@ -37,7 +37,9 @@ class Article(models.Model):
     body = models.TextField()
     summary = models.TextField(blank=True)
     markup_filter = models.PositiveIntegerField(max_length=32,
-        choices=MARKUP_FILTER_CHOICES, null=True, blank=True)
+                                                choices=MARKUP_FILTER_CHOICES,
+                                                null=True,
+                                                blank=True)
     slug = models.SlugField(blank=True, unique=True)
     published = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)

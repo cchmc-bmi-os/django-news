@@ -1,12 +1,14 @@
 from django.utils.feedgenerator import Atom1Feed, Rss201rev2Feed, \
     RssUserland091Feed
-from django.contrib.syndication.feeds import Feed, FeedDoesNotExist,\
-    ObjectDoesNotExist
+from django.contrib.syndication.views import Feed
 from models import Article
 
+
 class LatestArticles(Feed):
-    title = ""
+    title = ''
+    link = ''
     author_link = ''
+    description = ''
     copyright = ''
     author_name = ''
     author_email = ''
@@ -19,7 +21,6 @@ class LatestArticles(Feed):
     def item_author_name(self, obj):
         if obj.author:
             return obj.author.get_full_name()
-
         return None
 
     def item_author_email(self, obj):
@@ -35,18 +36,20 @@ class LatestArticles(Feed):
         return obj.get_absolute_url()
 
     def items(self):
-        return Article.objects.filter(published=True).order_by('-created')[:15]
+        return Article.objects.all().filter(published=True).order_by('-created')[:15]
+
 
 class RSSv1LatestArticles(LatestArticles):
-    link = "/rss/v1/latest/"
+    link = "/rss/v1/"
     feed_type = RssUserland091Feed
 
+
 class RSSv2LatestArticles(LatestArticles):
-    link = "/rss/v2/latest/"
+    link = "/rss/v2/"
     feed_type = Rss201rev2Feed
 
+
 class AtomLatestArticles(LatestArticles):
-    link = "/atom/v1/latest/"
+    link = "/atom/v1/"
     subtitle = LatestArticles.description
     feed_type = Atom1Feed
-

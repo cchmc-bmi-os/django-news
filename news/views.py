@@ -1,4 +1,5 @@
-from django.views.generic.list_detail import object_list,object_detail
+from django.views.generic.detail import DetailView
+from django.views.generic.list import ListView
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render_to_response, get_object_or_404
 from django.http import HttpResponseRedirect, Http404
@@ -6,32 +7,26 @@ from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from forms import NewsArticleForm
 from models import Article
-import availability
 
-def index(request, page=1, max_count=3):
-    qs = Article.objects.filter(published=True).order_by('-created')
 
-    return object_list(request, queryset=qs, template_object_name='article',\
-        paginate_by=max_count, page=page, extra_context={
-            'comments_available': availability.comments
-        })
+class ArticleDetailView(DetailView):
+    model = Article
+
 
 def article(request, identifier, slugified=False):
     data = {
         'queryset': Article.objects.filter(published=True)
     }
 
-    if slugified == False:
+    if slugified is False:
         data['object_id'] = identifier
     else:
         data['slug'] = identifier
 
-    data['template_object_name'] = 'article'
-    data['extra_context'] = {
-        'comments_available': availability.comments
-    }
+    data['template_name'] = 'article'
 
-    return object_detail(request, **data)
+    return ListView.as_view(**data)
+
 
 @login_required
 def edit_article(request, article_id=None, posted=False):
@@ -69,8 +64,9 @@ def edit_article(request, article_id=None, posted=False):
             form = NewsArticleForm(instance=article)
             editing = True
 
-    return render_to_response('news/article_edit.html', {'form': form, 'editing': editing, 'article': article}, \
-        context_instance=RequestContext(request))
+    return render_to_response('news/article_edit.html', {'form': form, 'editing': editing, 'article': article},
+                              context_instance=RequestContext(request))
+
 
 @login_required
 def delete_article(request, article_id):
@@ -82,4 +78,3 @@ def delete_article(request, article_id):
         article.delete()
 
     return HttpResponseRedirect(reverse('news_index'))
-
